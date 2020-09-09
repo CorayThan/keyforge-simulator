@@ -1,8 +1,4 @@
-import java.math.RoundingMode
-
 val debug = false
-
-data class Deck(val name: String, val cards: List<Card>)
 
 val decksToTest = listOf<Deck>()
     //.plus(labworks)
@@ -19,7 +15,7 @@ fun main() {
 
         repeat(games) {
 
-            val gameState = buildGame(deck)
+            val gameState = deck.buildGame()
 
             val turnsPerGame = 10
 
@@ -36,20 +32,21 @@ fun main() {
     }
 }
 
-fun buildGame(deck: Deck): GameState {
-    val cards = deck.cards
-    val houseOneToAdd = 12 - cards.count { it.house == House.ONE } - 1
-    val houseTwoToAdd = 12 - cards.count { it.house == House.TWO } - 1
-    val houseThreeToAdd = 12 - cards.count { it.house == House.THREE } - 1
-    val library = cards
-        .plus((0..houseOneToAdd).map { VanillaCard(House.ONE) })
-        .plus((0..houseTwoToAdd).map { VanillaCard(House.TWO) })
-        .plus((0..houseThreeToAdd).map { VanillaCard(House.THREE) })
-        .shuffled()
+data class Deck(val name: String, val cards: List<Card>) {
+    fun buildGame(): GameState {
+        val houseOneToAdd = 12 - cards.count { it.house == House.ONE } - 1
+        val houseTwoToAdd = 12 - cards.count { it.house == House.TWO } - 1
+        val houseThreeToAdd = 12 - cards.count { it.house == House.THREE } - 1
+        val library = cards
+            .plus((0..houseOneToAdd).map { VanillaCard(House.ONE) })
+            .plus((0..houseTwoToAdd).map { VanillaCard(House.TWO) })
+            .plus((0..houseThreeToAdd).map { VanillaCard(House.THREE) })
+            .shuffled()
 
-    val gameState = GameState()
-    gameState.library = library
-    return gameState
+        val gameState = GameState()
+        gameState.library = library
+        return gameState
+    }
 }
 
 enum class House {
