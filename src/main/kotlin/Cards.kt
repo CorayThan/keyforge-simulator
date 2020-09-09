@@ -1,4 +1,7 @@
-abstract class Card(open val playLast: Boolean = false) {
+abstract class Card(
+    open val playLast: Boolean = false,
+    open val isVanilla: Boolean = false
+) {
     abstract val house: House
     abstract fun effects(gameState: GameState, house: House)
 
@@ -8,10 +11,146 @@ abstract class Card(open val playLast: Boolean = false) {
 }
 
 class VanillaCard(
+    override val house: House = House.values().random(),
+    override val isVanilla: Boolean = true
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+    }
+
+}
+
+class EclecticInquiry(
     override val house: House = House.values().random()
 ) : Card() {
 
     override fun effects(gameState: GameState, house: House) {
+        gameState.archiveTopDeck(2)
+    }
+}
+
+
+class TautauVapors(
+    override val house: House = House.values().random(),
+    override val playLast: Boolean = true
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        gameState.drawCards(2)
+        gameState.archiveCardFromHand(house)
+    }
+}
+
+class PunctuatedEquilibrium(
+    override val house: House = House.values().random(),
+    override val playLast: Boolean = true
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        gameState.discardCards(gameState.hand)
+        gameState.fillHand(gameState.handSize)
+    }
+}
+
+class Eyegor(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        val top3 = gameState.library.take(3)
+        var sameHouse = top3.find { it.house == house && !it.isVanilla }
+        if (sameHouse == null) {
+            sameHouse = top3.find { it.house == house }
+        }
+        if (sameHouse != null) {
+            gameState.hand = gameState.hand.plus(sameHouse)
+        }
+        gameState.library = gameState.library.minus(top3)
+        gameState.discard = gameState.discard.plus(top3).let { if (sameHouse != null) it.minus(sameHouse) else it }
+    }
+}
+
+class LayOfTheLand(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        val top3 = gameState.library.take(3)
+        var sameHouse = top3.find { it.house == house && !it.isVanilla }
+        if (sameHouse == null) {
+            sameHouse = top3.find { it.house == house }
+        }
+        if (sameHouse != null) {
+            gameState.library = listOf(sameHouse)
+                .plus(gameState.library.minus(sameHouse))
+        }
+        gameState.drawCards(1)
+    }
+}
+
+class HelpFromFutureSelf(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        var ttFound =
+            gameState.library.find { it::class.java == TimeTraveller::class.java && (it as TimeTraveller).playedOnTurn != gameState.turns }
+        if (ttFound == null) {
+            ttFound =
+                gameState.discard.find { it::class.java == TimeTraveller::class.java && (it as TimeTraveller).playedOnTurn != gameState.turns }
+        }
+        gameState.moveToHand(ttFound)
+        gameState.shuffleDiscardIntoDeck()
+    }
+
+}
+
+class TimeTraveller(
+    override val house: House = House.values().random()
+) : Card() {
+
+    var playedOnTurn = -1
+
+    override fun effects(gameState: GameState, house: House) {
+        gameState.drawCards(2)
+        playedOnTurn = gameState.turns
+    }
+}
+
+class InfoOfficerGray(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        if (debug) println("Played mother on turn ${gameState.turns}")
+        gameState.archiveCardFromHand(house)
+        gameState.addFutureEffect(FutureEffect(gameState.turns + 3) {
+            gameState.archiveCardFromHand(house)
+        })
+    }
+
+}
+
+class Mother(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        if (debug) println("Played mother on turn ${gameState.turns}")
+        gameState.handSize++
+        gameState.addFutureEffect(FutureEffect(gameState.turns + 3) {
+            gameState.handSize--
+        })
+    }
+
+}
+
+class DrawPip(
+    override val house: House = House.values().random()
+) : Card() {
+
+    override fun effects(gameState: GameState, house: House) {
+        gameState.drawCards(1)
     }
 
 }
@@ -21,39 +160,14 @@ class Labwork(
 ) : Card() {
 
     override fun effects(gameState: GameState, house: House) {
-        val options = gameState.hand.filter { it.house != house }
-        if (options.isNotEmpty()) {
-            val toArchive = if (gameState.archived.isEmpty()) {
-                options.oneOfCardsWithLeastOfHouse()
-            } else {
-                val optionHouses = options.map { it.house }.toSet().toList()
-                if (optionHouses.size == 1) {
-                    options.first()
-                } else {
-                    val firstHouseArchiveCount = gameState.archived.count { it.house == optionHouses.first() }
-                    val secondHouseArchiveCount = gameState.archived.count { it.house == optionHouses[1] }
-                    if (firstHouseArchiveCount == secondHouseArchiveCount) {
-                        options.oneOfCardsWithLeastOfHouse()
-                    } else {
-                        options.first { it.house == if (firstHouseArchiveCount > secondHouseArchiveCount) optionHouses.first() else optionHouses[1] }
-                    }
-                }
-            }
-            if (debug) {
-                println("Archived card of house ${toArchive?.house} from hand: ${gameState.handString()}")
-            }
-
-            if (toArchive != null) {
-                gameState.archiveCard(toArchive)
-            }
-        }
+        gameState.archiveCardFromHand(house)
     }
 
 }
 
 class SloppyLabwork(
+    override val house: House = House.values().random(),
     override val playLast: Boolean = true,
-    override val house: House = House.values().random()
 ) : Card() {
 
     override fun effects(gameState: GameState, house: House) {
@@ -74,32 +188,7 @@ class SloppyLabwork(
             }
         }
 
-        val options = gameState.hand.filter { it.house != house }
-        if (options.isNotEmpty()) {
-            val toArchive = if (gameState.archived.isEmpty()) {
-                options.oneOfCardsWithLeastOfHouse()
-            } else {
-                val optionHouses = options.map { it.house }.toSet().toList()
-                if (optionHouses.size == 1) {
-                    options.first()
-                } else {
-                    val firstHouseArchiveCount = gameState.archived.count { it.house == optionHouses.first() }
-                    val secondHouseArchiveCount = gameState.archived.count { it.house == optionHouses[1] }
-                    if (firstHouseArchiveCount == secondHouseArchiveCount) {
-                        options.oneOfCardsWithMostOfHouse()
-                    } else {
-                        options.first { it.house == if (firstHouseArchiveCount > secondHouseArchiveCount) optionHouses.first() else optionHouses[1] }
-                    }
-                }
-            }
-            if (debug) {
-                println("Archived card of house ${toArchive?.house} from hand: ${gameState.handString()}")
-            }
-
-            if (toArchive != null) {
-                gameState.archiveCard(toArchive)
-            }
-        }
+        gameState.archiveCardFromHand(house)
     }
 
 }
@@ -112,7 +201,7 @@ class Yurk(
     override fun effects(gameState: GameState, house: House) {
 
         val optionsToDiscard = gameState.hand.filter { it.house != house }
-        if (optionsToDiscard.size > 1) {
+        if (optionsToDiscard.isNotEmpty()) {
             val discard = optionsToDiscard.oneOfCardsWithLeastOfHouse()
 
             if (debug) {

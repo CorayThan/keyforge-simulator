@@ -1,5 +1,10 @@
 import java.math.RoundingMode
 
+data class FutureEffect(
+    val onTurn: Int,
+    val effect: () -> Unit
+)
+
 class GameState {
     var hand = listOf<Card>()
     var archived = listOf<Card>()
@@ -12,8 +17,11 @@ class GameState {
 
     val cardsPlayed = mutableListOf<Int>()
 
+    var handSize = 6
+
+    val futureEffects = mutableListOf<FutureEffect>()
+
     fun takeTurn() {
-        val handSize = 6
 
         fillHand(handSize)
 
@@ -58,13 +66,19 @@ class GameState {
 
         cardsPlayed.add(played)
 
+        futureEffects.forEach {
+            if (turns == it.onTurn) {
+                it.effect()
+            }
+        }
+
         turns++
 
         if (debug) println("Choose house: $house hand: ${originalHand.contentsToString()} discard: ${originalDiscard.contentsToString()} played cards: $played")
     }
 
     fun cardInHandOfHouse(house: House): Card? {
-        return hand.sortedBy { it.playLast }.reversed().firstOrNull { it.house == house }
+        return hand.sortedBy { it.playLast }.firstOrNull { it.house == house }
     }
 
     fun discardCard(card: Card) {
@@ -107,6 +121,10 @@ class GameState {
         }
     }
 
+    fun addFutureEffect(effect: FutureEffect) {
+        this.futureEffects.add(effect)
+    }
+
     fun takeArchives() {
         hand = hand.plus(archived)
         archived = listOf()
@@ -118,6 +136,51 @@ class GameState {
 
     fun handString(): String {
         return "Hand contains: ${hand.groupBy { it.house }.map { "${it.key}=${it.value.size}" }}"
+    }
+
+    fun moveToHand(move: Card?) {
+        if (move != null) {
+            hand = hand.plus(move)
+            library = library.minus(move)
+            discard = discard.minus(move)
+            archived = archived.minus(move)
+            purged = purged.minus(move)
+        }
+    }
+
+    fun archiveTopDeck(num: Int) {
+        val toArchive = library.take(2)
+        library = library.minus(toArchive)
+        archived = archived.plus(toArchive)
+    }
+
+    fun archiveCardFromHand(currentHouse: House) {
+        val options = hand.filter { it.house != currentHouse }
+        if (options.isNotEmpty()) {
+            val toArchive = if (archived.isEmpty()) {
+                options.oneOfCardsWithLeastOfHouse()
+            } else {
+                val optionHouses = options.map { it.house }.toSet().toList()
+                if (optionHouses.size == 1) {
+                    options.first()
+                } else {
+                    val firstHouseArchiveCount = archived.count { it.house == optionHouses.first() }
+                    val secondHouseArchiveCount = archived.count { it.house == optionHouses[1] }
+                    if (firstHouseArchiveCount == secondHouseArchiveCount) {
+                        options.oneOfCardsWithLeastOfHouse()
+                    } else {
+                        options.first { it.house == if (firstHouseArchiveCount > secondHouseArchiveCount) optionHouses.first() else optionHouses[1] }
+                    }
+                }
+            }
+            if (debug) {
+                println("Archived card of house ${toArchive?.house} from hand: ${handString()}")
+            }
+
+            if (toArchive != null) {
+                archiveCard(toArchive)
+            }
+        }
     }
 }
 

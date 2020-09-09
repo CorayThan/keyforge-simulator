@@ -1,81 +1,159 @@
-val labworks = listOf(
+val labworks = buildStandardDecks("Labwork") { Labwork() }
+val sloppyLabworks = buildStandardDecks("Sloppy Labwork") { SloppyLabwork() }
+val yurks = buildStandardDecks("Yurk") { Yurk() }
+val drawPips = buildStandardDecks("Draw Pips") { DrawPip() }
+val mothers = buildStandardDecks("Mother") { Mother(House.ONE) }
+val infoOfficerGray = buildStandardDecks("Info Officer Gray") { InfoOfficerGray() }
+val eyegor = buildStandardDecks("Eyegor") { Eyegor(House.ONE) }
+val tautau = buildStandardDecks("Tautau Vapors") { TautauVapors(House.ONE) }
+val eclecticInquiry = buildStandardDecks("Eclectic Inquiry") { EclecticInquiry(House.ONE) }
+
+val punctuatedEquilibrium = listOf<Deck>(
     Deck(
-        "Two Labwork",
+        "One Punctuated Equilibrium",
         listOf<Card>()
-            .plus(
-                List(2) { Labwork() }
-            )
+            .plus(List(1) { PunctuatedEquilibrium(House.ONE) })
     ),
 
     Deck(
-        "Four Labwork",
+        "Two Punctuated Equilibrium",
         listOf<Card>()
-            .plus(
-                List(4) { Labwork() }
-            )
+            .plus(List(2) { PunctuatedEquilibrium(House.ONE) })
+    ),
+)
+
+val layOfTheLand = listOf<Deck>(
+    Deck(
+        "One Lay of the Land",
+        listOf<Card>()
+            .plus(List(1) { LayOfTheLand(House.ONE) })
     ),
 
-    )
+    Deck(
+        "Two Lay of the Lands",
+        listOf<Card>()
+            .plus(List(2) { LayOfTheLand(House.ONE) })
+    ),
+)
 
-val sloppyLabworks = listOf(
+val timeTraveller = listOf<Deck>(
+    Deck(
+        "Time Traveller",
+        listOf<Card>()
+            .plus(List(1) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(1) { TimeTraveller(House.ONE) })
+    ),
 
     Deck(
-        "One Sloppy Labwork",
+        "Time Traveller x 2",
+        listOf<Card>()
+            .plus(List(2) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(2) { TimeTraveller(House.ONE) })
+    ),
+)
+
+val nathansseatLike = listOf<Deck>(
+    Deck(
+        "3 mothers",
+        listOf<Card>()
+            .plus(
+                List(3) { Mother(House.ONE) }
+            )
+    ),
+    Deck(
+        "1 sloppy",
         listOf<Card>()
             .plus(
                 List(1) { SloppyLabwork() }
             )
     ),
-
     Deck(
-        "Two Sloppy Labwork",
+        "Time Traveller",
         listOf<Card>()
-            .plus(
-                List(2) { SloppyLabwork() }
-            )
+            .plus(List(1) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(1) { TimeTraveller(House.ONE) })
     ),
-
     Deck(
-        "Four Sloppy Labwork",
+        "Draw Pip",
         listOf<Card>()
-            .plus(
-                List(4) { SloppyLabwork() }
-            )
+            .plus(List(1) { DrawPip(House.ONE) })
     ),
-
     Deck(
-        "eight Sloppy Labwork",
+        "3 mothers + 1 sloppy + TT",
         listOf<Card>()
-            .plus(
-                List(8) { SloppyLabwork() }
-            )
+            .plus(List(1) { SloppyLabwork(House.ONE) })
+            .plus(List(3) { Mother(House.ONE) })
+            .plus(List(1) { TimeTraveller(House.ONE) })
+            .plus(List(1) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(1) { DrawPip(House.ONE) })
+
     ),
 )
 
-val yurks = listOf(
-
+val anteaterLike = listOf<Deck>(
     Deck(
-        "One Yurk",
+        "3 mothers",
         listOf<Card>()
             .plus(
-                List(1) { Yurk() }
+                List(3) { Mother(House.ONE) }
             )
     ),
-
     Deck(
-        "Two Yurk",
+        "1 sloppy",
         listOf<Card>()
             .plus(
-                List(2) { Yurk() }
+                List(1) { SloppyLabwork() }
             )
     ),
-
     Deck(
-        "Four Yurk",
+        "Time Traveller",
         listOf<Card>()
-            .plus(
-                List(4) { Yurk() }
-            )
+            .plus(List(1) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(1) { TimeTraveller(House.ONE) })
     ),
+    Deck(
+        "Draw Pip",
+        listOf<Card>()
+            .plus(List(1) { DrawPip(House.ONE) })
+    ),
+    Deck(
+        "3 mothers + 1 sloppy + TT",
+        listOf<Card>()
+            .plus(List(1) { SloppyLabwork(House.ONE) })
+            .plus(List(3) { Mother(House.ONE) })
+            .plus(List(1) { TimeTraveller(House.ONE) })
+            .plus(List(1) { HelpFromFutureSelf(House.ONE) })
+            .plus(List(1) { DrawPip(House.ONE) })
 
+    ),
 )
+
+fun buildStandardDecks(name: String, create: () -> Card): List<Deck> {
+    return listOf(
+
+        Deck(
+            "One $name",
+            listOf<Card>()
+                .plus(
+                    List(1) { create() }
+                )
+        ),
+
+        Deck(
+            "Two $name",
+            listOf<Card>()
+                .plus(
+                    List(2) { create() }
+                )
+        ),
+
+        Deck(
+            "Four $name",
+            listOf<Card>()
+                .plus(
+                    List(4) { create() }
+                )
+        ),
+
+        )
+}

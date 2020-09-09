@@ -1,10 +1,19 @@
 val debug = false
 
 val decksToTest = listOf<Deck>()
-    //.plus(labworks)
-    .plus(sloppyLabworks)
+//    .plus(labworks)
+//    .plus(sloppyLabworks)
 //    .plus(yurks)
-
+//    .plus(drawPips)
+//    .plus(mothers)
+//    .plus(sloppyMothers)
+//    .plus(timeTraveller)
+//    .plus(layOfTheLand)
+//    .plus(infoOfficerGray)
+//    .plus(eyegor)
+//    .plus(punctuatedEquilibrium)
+//    .plus(tautau)
+    .plus(eclecticInquiry)
 
 fun main() {
 
