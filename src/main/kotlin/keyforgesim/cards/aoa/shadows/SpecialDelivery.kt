@@ -9,9 +9,9 @@ class SpecialDelivery : Card(
     useValue = 1,
     playValue = 1,
     type = CardType.ARTIFACT,
+    hasOmni = true,
 ) {
     override fun omni(gameState: GameState) {
-        super.omni(gameState)
         gameState.currentTurnRecord.damage += 3
         gameState.destroy(this)
     }

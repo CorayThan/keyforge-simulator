@@ -7,6 +7,7 @@ import keyforgesim.cards.CardType
 import keyforgesim.cards.PlayOrder
 import keyforgesim.cards.oneOfCardsWithLeastOfHouse
 import keyforgesim.debug
+import keyforgesim.printDebug
 
 class Yurk : Card(
     "Yurk",
@@ -22,8 +23,8 @@ class Yurk : Card(
         if (optionsToDiscard.isNotEmpty()) {
             val discard = optionsToDiscard.oneOfCardsWithLeastOfHouse()
 
-            if (debug) {
-                println("Discard card ${discard.toString()} from hand: ${gameState.handString()}")
+            printDebug {
+                "Discard card ${discard.toString()} from hand: ${gameState.handString()}"
             }
 
             if (discard != null) {

@@ -13,7 +13,7 @@ class Labwork : Card(
 ) {
 
     override fun playEffect(gameState: GameState) {
-        gameState.archiveCardFromHand(house)
+        gameState.archiveCardFromHand()
     }
 
 }

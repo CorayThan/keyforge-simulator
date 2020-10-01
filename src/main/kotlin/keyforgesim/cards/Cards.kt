@@ -3,6 +3,7 @@ package keyforgesim.cards
 import keyforgesim.GameState
 import keyforgesim.House
 import keyforgesim.oneToOneHundred
+import keyforgesim.printDebug
 
 enum class PlayChoice {
     PLAY,
@@ -13,7 +14,8 @@ enum class PlayChoice {
 enum class UseType {
     REAP,
     FIGHT,
-    ACTION
+    ACTION,
+    OMNI,
 }
 
 enum class PlayOrder {
@@ -55,10 +57,12 @@ abstract class Card(
     val armor: Int = 0,
     var damage: Int = 0,
     var capturedAmber: Int = 0,
+    var ready: Boolean = false,
     var stunned: Boolean = false,
     var enraged: Boolean = false,
     var warded: Boolean = false,
     val action: ((gameState: GameState) -> Unit)? = null,
+    val hasOmni: Boolean = false,
     val upgrades: MutableList<Card> = mutableListOf()
 
 ) {
@@ -75,21 +79,26 @@ abstract class Card(
     open fun playEffect(gameState: GameState) {}
 
     open fun use(gameState: GameState) {
-        if (type == CardType.CREATURE) {
+        if (!ready) return
+        if (type == CardType.CREATURE || type == CardType.ARTIFACT) {
+            val useType = chooseUseType(gameState)
+            printDebug {
+                "Use card $name"
+            }
             when {
                 stunned -> stunned = false
                 enraged -> {
                     enraged = false
                     fight(gameState)
                 }
-                action != null -> action.invoke(gameState)
+                useType == UseType.ACTION && action != null -> action.invoke(gameState)
+                useType == UseType.OMNI && hasOmni -> omni(gameState)
+                useType == UseType.FIGHT -> fight(gameState)
                 else -> {
                     gameState.currentTurnRecord.amber++
                     reap(gameState)
                 }
             }
-        } else {
-            action?.invoke(gameState)
         }
     }
 
@@ -119,12 +128,14 @@ abstract class Card(
         }
     }
 
-    open fun chooseUseType(gameState: GameState) {}
+    open fun chooseUseType(gameState: GameState): UseType {
+        return if (type == CardType.CREATURE) UseType.REAP else UseType.ACTION
+    }
 
     open fun endOfTurn(gameState: GameState) {}
 
     override fun toString(): String {
-        return "$house - ${this.javaClass.simpleName}"
+        return "$house - ${this.name}"
     }
 
 }
@@ -133,6 +144,7 @@ class VanillaCard(val fakeHouse: House) : Card(
     "Vanilla",
     randomCardType(),
     isVanilla = true,
+    playValue = 2
 ) {
 
     init {
@@ -145,7 +157,7 @@ class VanillaCard(val fakeHouse: House) : Card(
 }
 
 fun List<Card>.contentsToString(): String {
-    return "${this.groupBy { it.house }.map { "${it.key}=${it.value.size}" }}"
+    return this.groupBy { it.house }.map { "${it.key}=${it.value.size}" }.joinToString(", ")
 }
 
 fun List<Card>.mostCommonHouses(): Set<House> {

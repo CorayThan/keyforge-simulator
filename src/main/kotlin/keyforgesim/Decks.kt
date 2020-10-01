@@ -1,17 +1,18 @@
 package keyforgesim
 
+import keyforgesim.cards.BlankCard
 import keyforgesim.cards.Card
 import keyforgesim.cards.VanillaCard
-import keyforgesim.cards.aoa.logos.Eyegor
-import keyforgesim.cards.aoa.untamed.PunctuatedEquilibrium
-import keyforgesim.cards.aoa.dis.Yurk
+import keyforgesim.cards.aoa.dis.*
+import keyforgesim.cards.aoa.logos.*
+import keyforgesim.cards.aoa.shadows.*
+import keyforgesim.cards.cota.dis.*
 import keyforgesim.cards.cota.logos.*
 import keyforgesim.cards.mm.logos.EclecticInquiry
-import keyforgesim.cards.wc.staralliance.InformationOfficerGray
-import keyforgesim.cards.wc.staralliance.LayOfTheLand
 import keyforgesim.cards.wc.logos.TautauVapors
-import java.lang.RuntimeException
+import keyforgesim.cards.wc.staralliance.InformationOfficerGray
 
+val blank = buildStandardDecks("Blank Cards") { BlankCard() }
 val labworks = buildStandardDecks("Labwork") { Labwork() }
 val sloppyLabworks = buildStandardDecks("Sloppy Labwork") { SloppyLabwork() }
 val yurks = buildStandardDecks("Yurk") { Yurk() }
@@ -97,37 +98,91 @@ val eclecticInquiry = buildStandardDecks("Eclectic Inquiry") { EclecticInquiry()
 //    ),
 //)
 //
-//val anteaterLike = listOf<Deck>(
-//    Deck(
-//        "3 keyforgesim.getMothers",
-//        listOf<Card>()
-//            .plus(
-//                List(3) { Mother() }
-//            )
-//    ),
-//    Deck(
-//        "1 sloppy",
-//        listOf<Card>()
-//            .plus(
-//                List(1) { SloppyLabwork() }
-//            )
-//    ),
-//    Deck(
-//        "Time Traveller",
-//        listOf<Card>()
-//            .plus(List(1) { HelpFromFutureSelf() })
-//            .plus(List(1) { TimeTraveller() })
-//    ),
-//    Deck(
-//        "3 keyforgesim.getMothers + 1 sloppy + TT",
-//        listOf<Card>()
-//            .plus(List(1) { SloppyLabwork() })
-//            .plus(List(3) { Mother() })
-//            .plus(List(1) { TimeTraveller() })
-//            .plus(List(1) { HelpFromFutureSelf() })
-//
-//    ),
-//)
+val anteaterLike = listOf<Deck>(
+    Deck(
+        "3 mothers",
+        listOf<Card>()
+            .plus(
+                List(3) { Mother().apply { this.house = House.LOGOS } }
+            )
+    ),
+    Deck(
+        "1 sloppy",
+        listOf<Card>()
+            .plus(
+                List(1) { SloppyLabwork().apply { this.house = House.LOGOS } }
+            )
+    ),
+    Deck(
+        "Time Traveller",
+        listOf<Card>()
+            .plus(List(1) { HelpFromFutureSelf().apply { this.house = House.LOGOS } })
+            .plus(List(1) { TimeTraveller().apply { this.house = House.LOGOS } })
+    ),
+    Deck(
+        "3 Mothers + 1 sloppy + TT",
+        listOf<Card>()
+            .plus(List(1) { SloppyLabwork().apply { this.house = House.LOGOS } })
+            .plus(List(3) { Mother().apply { this.house = House.LOGOS } })
+            .plus(List(1) { TimeTraveller().apply { this.house = House.LOGOS } })
+            .plus(List(1) { HelpFromFutureSelf().apply { this.house = House.LOGOS } })
+
+    ),
+)
+
+val chineseDeck = Deck(
+    "Chinese AoA deck",
+    listOf(
+        CullTheWeak(),
+        LashOfBrokenDreams(),
+        Angwish(),
+        Charette(),
+        DustImp(),
+        OverlordGreking(),
+        Tezmal(),
+        Tezmal(),
+        Yurk(),
+        Yurk(),
+        CollarOfSubordination(),
+        Soulkeeper(),
+    ).apply { this.forEach { it.house = House.DIS } }
+        .plus(
+            listOf(
+                BinateRupture(),
+                CutthroatResearch(),
+                Eureka(),
+                InterdimensionalGraft(),
+                RemoteAccess(),
+                SloppyLabwork(),
+                WildWormhole(),
+                LibraryOfBabble(),
+                QuantumFingertrap(),
+                Eyegor(),
+                ProfessorSutterkin(),
+                TitanLibrarian(),
+            )
+                .apply { this.forEach { it.house = House.LOGOS } }
+        )
+        .plus(
+            listOf(
+                FurtiveInvestors(),
+                LifeForALife(),
+                NerveBlast(),
+                SuckerPunch(),
+                WhistlingDarts(),
+                SkeletonKey(),
+                SpecialDelivery(),
+                BrendTheFanatic(),
+                RonnieWristclocks(),
+                RonnieWristclocks(),
+                SelwynTheFence(),
+                Sneklifter(),
+            )
+                .apply { this.forEach { it.house = House.SHADOWS } }
+        )
+
+
+)
 
 fun buildStandardDecks(name: String, create: () -> Card): List<Deck> {
     return listOf(

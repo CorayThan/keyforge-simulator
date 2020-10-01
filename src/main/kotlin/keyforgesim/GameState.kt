@@ -67,6 +67,18 @@ class GameState {
             }
         }
 
+        var halfOfBrig: Card? = null
+
+        if (hand.any { it.name == "Binate Rupture" } && hand.any { it.name == "Interdimensional Graft" }) {
+            currentTurnRecord.gotBrig = true
+        } else {
+            halfOfBrig = hand.find { it.name == "Binate Rupture" || it.name == "Interdimensional Graft" }
+            if (halfOfBrig != null) {
+                hand = hand.minus(halfOfBrig)
+            }
+        }
+
+
         val originalHand = hand
         val originalDiscard = discard
 
@@ -105,17 +117,18 @@ class GameState {
         currentTurnRecord.house = house
 
         if (archived.any { it.house == house }) {
-            if (debug) println("Took archives: ${archived} with hand: ${handString()}")
+            printDebug {
+                "Took archives: ${archived} with hand: ${handString()}"
+            }
             takeArchives()
         }
 
-        var played = 0
         val alphas = hand.filter { it.playOrder == PlayOrder.ALPHA && it.house == house }
 
         if (alphas.size > 1) {
             val best = alphas.maxByOrNull { it.totalValue }
             if (best != null) {
-                played++
+                currentTurnRecord.played = currentTurnRecord.played.plus(best.name)
                 playCard(best)
             }
         }
@@ -136,7 +149,7 @@ class GameState {
                         if (toPlay.playOrder == PlayOrder.ALPHA) {
                             discardCard(toPlay)
                         } else {
-                            played++
+                            currentTurnRecord.played = currentTurnRecord.played.plus(toPlay.name)
                             playCard(toPlay)
                         }
                     }
@@ -146,7 +159,9 @@ class GameState {
 
         } while (toPlay != null)
 
-        currentTurnRecord.cardsPlayed = played
+        if (halfOfBrig != null) {
+            hand = hand.plus(halfOfBrig)
+        }
 
         board.forEach {
             if (board.contains(it)) {
@@ -154,24 +169,27 @@ class GameState {
             }
             when (it.type) {
                 CardType.CREATURE -> {
-                    odds(25) {
+                    odds(35) {
                         destroy(it)
                     }
-                    if (board.contains(it)) {
-                        it.omni(this)
+                    if (board.contains(it) && it.ready) {
                         if (it.house == house) {
                             it.use(this)
+                        } else if (it.hasOmni) {
+                            it.omni(this)
                         }
                     }
                 }
                 CardType.ARTIFACT -> {
-                    odds(5) {
+                    odds(10) {
                         destroy(it)
                     }
                     if (board.contains(it)) {
-                        it.omni(this)
+
                         if (it.house == house) {
                             it.use(this)
+                        } else if (it.hasOmni) {
+                            it.omni(this)
                         }
                     }
                 }
@@ -195,7 +213,17 @@ class GameState {
             }
         }
 
-        if (debug) println("Choose house: $house hand: ${originalHand.contentsToString()} discard: ${originalDiscard.contentsToString()} played cards: $played")
+        board.forEach { it.ready = true }
+
+        if (debug) {
+            println(
+                "Choose house: $house \n" +
+                        "hand: ${originalHand.contentsToString()} \n" +
+                        "contents: ${originalHand.sortedBy { it.house }.joinToString(", ") { it.name }}\n" +
+                        "discard: ${originalDiscard.contentsToString()} \n" +
+                        "played ${currentTurnRecord.played.size} cards: ${currentTurnRecord.played.joinToString(", ")}\n\n"
+            )
+        }
     }
 
     fun playCard(toPlay: Card) {
@@ -239,6 +267,9 @@ class GameState {
     }
 
     fun destroy(card: Card) {
+        printDebug {
+            "Destroying ${card.name}"
+        }
         board = board.minus(card)
         discard = discard.plus(card)
         card.destroy(this)
@@ -370,8 +401,8 @@ class GameState {
                     }
                 }
             }
-            if (debug) {
-                println("Archived card of house ${toArchive?.house} from hand: ${handString()}")
+            printDebug {
+                "Archived card of house ${toArchive?.house} from hand: ${handString()}"
             }
 
             if (toArchive != null) {
@@ -383,17 +414,31 @@ class GameState {
 
 fun List<GameState>.printStats(games: Int) {
 
-    val played = this.map { it.turnRecords.map { record -> record.cardsPlayed }.average() }.average()
+    val played = this.map { it.turnRecords.map { record -> record.played.size }.average() }.average()
     val shuffles = this.map { it.shuffles }.average()
     val turns = this.map { it.turns }.average()
 
+//    val brigTurnPercents = this.map {
+//        it.turnRecords.indexOfFirst { it.gotBrig }
+//    }
+//        .groupBy { it }
+//        .map { it.key to it.value.size }
+//        .sortedBy { if (it.first == -1) 1000 else it.first }
+//        .map { "Turn: ${if (it.first == -1) "No Brig" else (it.first + 1)} -- ${((it.second.toDouble() / games) * 100).toBigDecimal().setScale(2, RoundingMode.HALF_UP)}%" }
+//        .joinToString("\n")
+
     println(
         """
+        Turns: $turns
+        Cards Played: ${(played * 10)}         
         Average cards per turn: ${played.toBigDecimal().setScale(2, RoundingMode.HALF_UP)}         
-        extra cards played: ${((played - 3.33) * turns).toBigDecimal().setScale(2, RoundingMode.HALF_UP)}
+        extra cards played: ${((played - 3.54) * turns).toBigDecimal().setScale(2, RoundingMode.HALF_UP)}
     """.trimIndent()
 //        shuffles $shuffles
 //        turns $turns
 //        games $games
     )
+
+
+    println()
 }

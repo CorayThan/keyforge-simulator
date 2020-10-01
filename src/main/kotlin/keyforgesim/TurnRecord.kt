@@ -13,7 +13,6 @@ data class TurnRecord(
     var creaturesBounced: Int = 0,
     var creaturesStunned: Int = 0,
 
-    var cardsPlayed: Int = 0,
     var cardsDrawn: Int = 0,
     var cardsDiscarded: Int = 0,
     var archived: Int = 0,
@@ -23,4 +22,6 @@ data class TurnRecord(
     var wentInfinite: Boolean = false,
     var opponentKeyCost: Int = 6,
     var playerKeyCost: Int = 6,
+    var played: List<String> = listOf(),
+    var gotBrig: Boolean = false,
 )

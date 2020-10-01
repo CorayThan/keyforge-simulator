@@ -4,6 +4,7 @@ import keyforgesim.GameState
 import keyforgesim.cards.Card
 import keyforgesim.cards.CardType
 import keyforgesim.cards.PlayOrder
+import keyforgesim.coinFlip
 
 class SuckerPunch : Card(
     "Sucker Punch",
@@ -14,10 +15,9 @@ class SuckerPunch : Card(
 ) {
 
     override fun playEffect(gameState: GameState) {
-        repeat(2) {
-            if (gameState.hand.isNotEmpty()) {
-                gameState.archiveCard(gameState.hand.random())
-            }
+        gameState.currentTurnRecord.damage += 2
+        coinFlip {
+
         }
     }
 

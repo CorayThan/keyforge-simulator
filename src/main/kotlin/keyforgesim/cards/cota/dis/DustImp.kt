@@ -10,7 +10,7 @@ import keyforgesim.debug
 class DustImp : Card(
     "Dust Imp",
     CardType.CREATURE,
-    playValue = 2,
+    playValue = 1,
     power = 2,
 ) {
 

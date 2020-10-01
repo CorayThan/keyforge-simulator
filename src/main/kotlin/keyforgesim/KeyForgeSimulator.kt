@@ -15,14 +15,23 @@ val decksToTest = listOf<Deck>()
 //    .plus(keyforgesim.getEyegor)
 //    .plus(keyforgesim.getPunctuatedEquilibrium)
 //    .plus(keyforgesim.getTautau)
-    .plus(eclecticInquiry)
+//    .plus(eclecticInquiry)
+//    .plus(chineseDeck)
+    //.plus(blank)
+    .plus(anteaterLike)
+
+fun printDebug(message: () -> String) {
+    if (debug) {
+        println(message())
+    }
+}
 
 fun main() {
 
     decksToTest.forEach { deck ->
         val stats = mutableListOf<GameState>()
 
-        val games = if (debug) 1 else 1000
+        val games = if (debug) 1 else 100000
 
         repeat(games) {
 

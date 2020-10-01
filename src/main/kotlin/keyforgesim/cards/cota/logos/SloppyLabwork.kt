@@ -4,6 +4,7 @@ import keyforgesim.GameState
 import keyforgesim.House
 import keyforgesim.cards.*
 import keyforgesim.debug
+import keyforgesim.printDebug
 
 class SloppyLabwork : Card(
     "Sloppy Labwork",
@@ -22,8 +23,8 @@ class SloppyLabwork : Card(
             }
             val discard = optionsToDiscard.oneOfCardsWithLeastOfHouse()
 
-            if (debug) {
-                println("Discard card ${discard.toString()} from hand: ${gameState.handString()}")
+            printDebug {
+                "Discard card ${discard.toString()} from hand: ${gameState.handString()}"
             }
 
             if (discard != null) {
@@ -31,7 +32,7 @@ class SloppyLabwork : Card(
             }
         }
 
-        gameState.archiveCardFromHand(house)
+        gameState.archiveCardFromHand()
     }
 
 }
