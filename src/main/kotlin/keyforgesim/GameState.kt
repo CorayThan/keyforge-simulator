@@ -55,7 +55,7 @@ class GameState {
         fillHand()
 
         if (turns == 0) {
-            if (hand.count { it.house == House.DIS } == 2 && hand.count { it.house == House.LOGOS } == 2) {
+            if (hand.groupBy { it.house }.all { it.value.size == 2 }) {
                 // mulligan
                 discardCards(hand)
                 shuffleDiscardIntoDeck()
@@ -194,7 +194,7 @@ class GameState {
                     }
                 }
                 CardType.UPGRADE -> {
-                    odds(33) {
+                    odds(1) {
                         destroy(it)
                     }
                 }
@@ -417,6 +417,8 @@ fun List<GameState>.printStats(games: Int) {
     val played = this.map { it.turnRecords.map { record -> record.played.size }.average() }.average()
     val shuffles = this.map { it.shuffles }.average()
     val turns = this.map { it.turns }.average()
+
+    println()
 
 //    val brigTurnPercents = this.map {
 //        it.turnRecords.indexOfFirst { it.gotBrig }

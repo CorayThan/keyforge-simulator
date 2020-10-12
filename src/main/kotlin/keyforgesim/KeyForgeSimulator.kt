@@ -17,8 +17,9 @@ val decksToTest = listOf<Deck>()
 //    .plus(keyforgesim.getTautau)
 //    .plus(eclecticInquiry)
 //    .plus(chineseDeck)
-    //.plus(blank)
-    .plus(anteaterLike)
+    .plus(blankActions)
+    .plus(blank)
+//    .plus(anteaterLike)
 
 fun printDebug(message: () -> String) {
     if (debug) {

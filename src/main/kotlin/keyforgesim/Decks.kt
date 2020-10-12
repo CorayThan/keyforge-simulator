@@ -1,8 +1,6 @@
 package keyforgesim
 
-import keyforgesim.cards.BlankCard
-import keyforgesim.cards.Card
-import keyforgesim.cards.VanillaCard
+import keyforgesim.cards.*
 import keyforgesim.cards.aoa.dis.*
 import keyforgesim.cards.aoa.logos.*
 import keyforgesim.cards.aoa.shadows.*
@@ -12,7 +10,7 @@ import keyforgesim.cards.mm.logos.EclecticInquiry
 import keyforgesim.cards.wc.logos.TautauVapors
 import keyforgesim.cards.wc.staralliance.InformationOfficerGray
 
-val blank = buildStandardDecks("Blank Cards") { BlankCard() }
+val blank = buildStandardDecks("Blank Cards") { VanillaCard(House.DIS) }
 val labworks = buildStandardDecks("Labwork") { Labwork() }
 val sloppyLabworks = buildStandardDecks("Sloppy Labwork") { SloppyLabwork() }
 val yurks = buildStandardDecks("Yurk") { Yurk() }
@@ -21,6 +19,16 @@ val infoOfficerGray = buildStandardDecks("Info Officer Gray") { InformationOffic
 val eyegor = buildStandardDecks("Eyegor") { Eyegor() }
 val tautau = buildStandardDecks("Tautau Vapors") { TautauVapors() }
 val eclecticInquiry = buildStandardDecks("Eclectic Inquiry") { EclecticInquiry() }
+
+val blankActions = listOf<Deck>(
+    Deck(
+        "Blank Actions",
+        listOf<Card>()
+            .plus(List(12) { BlankDis() })
+            .plus(List(12) { BlankLogos() })
+            .plus(List(12) { BlankShadows() })
+    )
+)
 
 //val punctuatedEquilibrium = listOf<Deck>(
 //    Deck(
